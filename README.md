@@ -1,2 +1,0 @@
-# njajal
-coba buat

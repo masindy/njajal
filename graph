@@ -1,0 +1,123 @@
+#class graph
+
+package SDNL;
+
+import java.util.*;
+
+public class Graph {
+    private Map<String, List<Edge>> adjacencyList;
+    private List<Vertex> vertexList;
+
+    public Graph() {
+        adjacencyList = new HashMap<>();
+        vertexList = new ArrayList<>();
+    }
+
+    public void addVertex(String node) {
+        Vertex vertex = new Vertex(node);
+        vertexList.add(vertex);
+        adjacencyList.put(node, new ArrayList<>());
+    }
+
+    public void addEdge(String source, String destination, int weight) {
+        Edge edge = new Edge(source, destination, weight);
+        adjacencyList.get(source).add(edge);
+
+        // For an undirected graph, add the reverse edge as well
+        Edge reverseEdge = new Edge(destination, source, weight);
+        adjacencyList.get(destination).add(reverseEdge);
+    }
+    public ArrayList<String> getVertices() {
+        ArrayList<String> vertices = new ArrayList<>();
+        for (Vertex vertex : vertexList) {
+            vertices.add(vertex.getLabel());
+        }
+        return vertices;
+    }
+
+    public ArrayList<String> getShortestPath(String source, String destination) {
+        Map<String, String> previousNode = new HashMap<>();
+        Map<String, Integer> distance = new HashMap<>();
+        PriorityQueue<Vertex> priorityQueue = new PriorityQueue<>(Comparator.comparingInt(Vertex::getDistance));
+        
+        // Initialize distance and previousNode maps
+        for (Vertex vertex : vertexList) {
+            if (vertex.getLabel().equals(source)) {
+                vertex.setDistance(0);
+            } else {
+                vertex.setDistance(Integer.MAX_VALUE);
+            }
+            previousNode.put(vertex.getLabel(), null);
+            distance.put(vertex.getLabel(), vertex.getDistance());
+            priorityQueue.add(vertex);
+        }
+
+        while (!priorityQueue.isEmpty()) {
+            Vertex currentVertex = priorityQueue.poll();
+            if (currentVertex.getLabel().equals(destination)) {
+                break;  // Found the destination, exit the loop
+            }
+
+            List<Edge> neighbors = adjacencyList.get(currentVertex.getLabel());
+            for (Edge edge : neighbors) {
+                Vertex neighborVertex = getVertexByLabel(edge.getDestinationVertex());
+                int distanceToNeighbor = distance.get(currentVertex.getLabel()) + edge.getWeight();
+                if (distanceToNeighbor < distance.get(neighborVertex.getLabel())) {
+                    priorityQueue.remove(neighborVertex);
+                    neighborVertex.setDistance(distanceToNeighbor);
+                    previousNode.put(neighborVertex.getLabel(), currentVertex.getLabel());
+                    distance.put(neighborVertex.getLabel(), neighborVertex.getDistance());
+                    priorityQueue.add(neighborVertex);
+                }
+            }
+        }
+
+        ArrayList<String> shortestPath = new ArrayList<>();
+        String current = destination;
+        while (current != null) {
+            shortestPath.add(0, current);
+            current = previousNode.get(current);
+        }
+
+        if (shortestPath.size() > 1) {
+            return shortestPath;
+        } else {
+            return null;  // No path exists
+        }
+    }
+
+    private Vertex getVertexByLabel(String label) {
+        for (Vertex vertex : vertexList) {
+            if (vertex.getLabel().equals(label)) {
+                return vertex;
+            }
+        }
+        return null;
+    }
+    
+    public int calculateDistance(String source, String destination) {
+        ArrayList<String> shortestPath = getShortestPath(source, destination);
+        if (shortestPath != null) {
+            int distance = 0;
+            for (int i = 0; i < shortestPath.size() - 1; i++) {
+                String currentVertex = shortestPath.get(i);
+                String nextVertex = shortestPath.get(i + 1);
+                distance += getEdgeWeight(currentVertex, nextVertex);
+            }
+            return distance;
+        } else {
+            return -1; // No path exists
+        }
+    }
+    
+    private int getEdgeWeight(String source, String destination) {
+        List<Edge> edges = adjacencyList.get(source);
+        for (Edge edge : edges) {
+            if (edge.getDestinationVertex().equals(destination)) {
+                return edge.getWeight();
+            }
+        }
+        return -1; // Edge not found
+    }
+}
+
