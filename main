@@ -1,0 +1,169 @@
+package SDNL;
+
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+
+public class Main extends Application {
+
+    private static String sourceCity; // Store the selected source city
+    private static String destinationCity; // Store the selected destination city
+    private static Graph graph;
+
+    public static void main(String[] args) {
+        graph = createGraph();
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Delivery App");
+
+        // Set background color
+        BackgroundFill backgroundFill = new BackgroundFill(Color.CYAN, null, null);
+        Background background = new Background(backgroundFill);
+
+        // Create label for the app title
+        Label titleLabel = new Label("Delivery App");
+        titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        // Create UI controls
+        Label sourceLabel = new Label("Kota Asal:");
+        ComboBox<String> sourceComboBox = new ComboBox<>();
+        sourceComboBox.getItems().addAll(graph.getVertices());
+
+        Label destinationLabel = new Label("Kota Tujuan:");
+        ComboBox<String> destinationComboBox = new ComboBox<>();
+        destinationComboBox.getItems().addAll(graph.getVertices());
+
+        Button sendPackageButton = new Button("Kirim Barang");
+        Button displayCitiesButton = new Button("Tampilkan Kota-kota");
+        Button exitButton = new Button("Keluar");
+
+        // Create event handlers
+        sendPackageButton.setOnAction(e -> {
+            sourceCity = sourceComboBox.getValue();
+            destinationCity = destinationComboBox.getValue();
+            if (sourceCity == null || destinationCity == null) {
+                displayError("Data kota asal dan tujuan belum diisi. Silakan isi pada menu Kirim Barang terlebih dahulu.");
+            } else {
+                sendPackage(graph, sourceCity, destinationCity);
+            }
+        });
+
+        displayCitiesButton.setOnAction(e -> displayAvailableCities(graph));
+
+
+        exitButton.setOnAction(e -> primaryStage.close());
+
+        // Create layout
+        VBox layout = new VBox(10);
+        layout.setPadding(new Insets(10));
+        layout.setAlignment(Pos.CENTER);
+        layout.setBackground(background); // Set background
+        layout.getChildren().addAll(titleLabel, sourceLabel, sourceComboBox, destinationLabel, destinationComboBox,
+                sendPackageButton, displayCitiesButton, exitButton);
+
+        // Create scene
+        Scene scene = new Scene(layout, 600, 400);
+
+        // Set scene and show the stage
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    public static Graph createGraph() {
+        Graph graph = new Graph();
+
+        // Add vertices
+        graph.addVertex("Jakarta");
+        graph.addVertex("Depok");
+        graph.addVertex("Bogor");
+        graph.addVertex("Bandung");
+        graph.addVertex("Cirebon");
+        graph.addVertex("Semarang");
+        graph.addVertex("Surabaya");
+        graph.addVertex("Tasikmalaya");
+        graph.addVertex("Cilacap");
+        graph.addVertex("Magelang");
+        graph.addVertex("Yogyakarta");
+        graph.addVertex("Malang");
+
+        graph.addEdge("Jakarta", "Depok", 30);
+        graph.addEdge("Depok", "Bogor", 45);
+        graph.addEdge("Depok", "Bandung", 65);
+        graph.addEdge("Bogor", "Bandung", 80);
+        graph.addEdge("Bandung", "Cirebon", 135);
+        graph.addEdge("Cirebon", "Semarang", 240);
+        graph.addEdge("Bandung", "Tasikmalaya", 115);
+        graph.addEdge("Tasikmalaya", "Semarang", 335);
+        graph.addEdge("Tasikmalaya", "Cilacap", 150);
+        graph.addEdge("Semarang", "Magelang", 85);
+        graph.addEdge("Semarang", "Surabaya", 350);
+        graph.addEdge("Yogyakarta", "Malang", 390);
+        graph.addEdge("Yogyakarta", "Magelang", 70);
+        graph.addEdge("Yogyakarta", "Cilacap", 180);
+
+        return graph;
+    }
+
+public static void sendPackage(Graph graph, String source, String destination) {
+    StringBuilder shortestPathInfo = new StringBuilder("Rute terpendek dari ")
+            .append(source).append(" ke ").append(destination).append("\n");
+
+    ArrayList<String> shortestPath = graph.getShortestPath(source, destination);
+    if (shortestPath != null && shortestPath.size() > 0) {
+        for (int i = 0; i < shortestPath.size() - 1; i++) {
+            shortestPathInfo.append(shortestPath.get(i)).append(" -> ");
+        }
+        shortestPathInfo.append(shortestPath.get(shortestPath.size() - 1));
+
+        // Calculate and display the total distance
+        int distance = graph.calculateDistance(source, destination);
+        shortestPathInfo.append("\nJarak total: ").append(distance);
+
+        // Display the number of cities passed
+        int citiesPassed = shortestPath.size();
+        String message = "Jumlah kota yang dilewati: " + citiesPassed;
+        JOptionPane.showMessageDialog(null, message);
+    } else {
+        shortestPathInfo.append("Tidak ada rute yang tersedia atau kota asal/destinasi tidak valid.");
+    }
+
+    displayInfo(shortestPathInfo.toString());
+}
+
+    public static void displayAvailableCities(Graph graph) {
+        ArrayList<String> cities = graph.getVertices();
+        StringBuilder availableCities = new StringBuilder("Kota-kota yang tersedia:\n");
+        for (String city : cities) {
+            availableCities.append(city).append("\n");
+        }
+        displayInfo(availableCities.toString());
+    }
+
+
+    public static void displayInfo(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Informasi");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    public static void displayError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+}
