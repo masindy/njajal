@@ -1,0 +1,24 @@
+package SDNL;
+class Edge {
+    private String sourceVertex;
+    private String destinationVertex;
+    private int weight;
+
+    public Edge(String sourceVertex, String destinationVertex, int weight) {
+        this.sourceVertex = sourceVertex;
+        this.destinationVertex = destinationVertex;
+        this.weight = weight;
+    }
+
+    public String getSourceVertex() {
+        return sourceVertex;
+    }
+
+    public String getDestinationVertex() {
+        return destinationVertex;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+}
