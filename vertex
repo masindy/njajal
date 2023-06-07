@@ -1,0 +1,43 @@
+package SDNL;
+
+public class Vertex {
+    protected String label;
+    protected boolean flagVisited;
+    protected int distance;
+
+    public Vertex() {
+        flagVisited = false;
+        distance = 0;
+    }
+
+    public Vertex(String label) {
+        this.label = label;
+        flagVisited = false;
+        distance = 0;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setFlagVisited(boolean flagVisited) {
+        this.flagVisited = flagVisited;
+    }
+
+    public boolean isFlagVisited() {
+        return flagVisited;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+
+    public int getDistance() {
+        return distance;
+    }
+}
+
